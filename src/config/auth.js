@@ -61,6 +61,12 @@ export default class Auth {
           .collection("user")
           .doc(uid)
           .get();
+        if (!snapshot.exists) {
+          return {
+            success: false,
+            message: "Wrong info",
+          };
+        }
         const result = snapshot.data();
         const {displayName, email, photoURL} = result;
         this.storage.setItem(APP.USER_ID, uid);
