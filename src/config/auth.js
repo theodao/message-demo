@@ -31,6 +31,7 @@ export default class Auth {
               email,
               photoURL,
               displayName,
+              available: true,
             });
         }
         this.storage.setItem(APP.USER_ID, uid);
@@ -103,6 +104,7 @@ export default class Auth {
             email,
             photoURL,
             displayName,
+            available: true,
           });
         return {
           success: true,

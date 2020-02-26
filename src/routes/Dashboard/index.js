@@ -14,6 +14,7 @@ const Header = styled.div`
   text-align: center;
   margin: 0 auto;
   padding: 30px;
+  height: calc(20vh - 60px);
 `;
 
 const LogoutButton = styled.div`
@@ -30,7 +31,7 @@ const LogoutButton = styled.div`
 
 const Container = styled.div`
   display: flex;
-  height: 100%;
+  height: 80vh;
   width: 100%;
 `;
 
@@ -58,9 +59,26 @@ const ConversationContainer = styled.div`
   heigth: 100%;
 `;
 
-const UserItem = ({photoURL, displayName, email, handleClickOnUserItem}) => {
+const Name = styled.div`
+  position: relative;
+  &:after {
+    background-color: ${props => (props.available ? "green" : "#e8e8e8")};
+    width: 5px;
+    height: 5px;
+    content: "";
+    display: inline-block;
+    position: absolute;
+    top: 9px;
+    border-radius: 50%;
+    margin-left: 5px;
+    align-items: center;
+    text-align: center;
+  }
+`;
+
+const UserItem = ({photoURL, displayName, email, available, handleClickOnUserItem}) => {
   return (
-    <UserItemContainer onClick={handleClickOnUserItem}>
+    <UserItemContainer onClick={() => handleClickOnUserItem()}>
       <ImageContainer src={photoURL} />
       <div
         style={{
@@ -68,7 +86,7 @@ const UserItem = ({photoURL, displayName, email, handleClickOnUserItem}) => {
           flexDirection: "column",
           marginLeft: "10px",
         }}>
-        <div>{displayName}</div>
+        <Name available={available}>{displayName}</Name>
         <div>{email}</div>
       </div>
     </UserItemContainer>
@@ -78,13 +96,35 @@ const UserItem = ({photoURL, displayName, email, handleClickOnUserItem}) => {
 export default ({history}) => {
   const {displayName, id, email, photoURL} = new Auth().getUserInfo();
   const [userList, setUserList] = useState([]);
+  const [currentUserChat, setCurrentUserChat] = useState(null);
   useEffect(() => {
     firestore.collection("user").onSnapshot(snapshot => {
-      setUserList(snapshot.docs.map(doc => doc.data()));
+      setUserList(
+        snapshot.docs
+          .map(doc => {
+            return doc.data();
+          })
+          .filter(doc => {
+            return doc.id !== window.localStorage.getItem(APP.USER_ID);
+          }),
+      );
     });
   }, []);
 
-  const handleClickOnUserItem = () => {};
+  const handleClickOnUserItem = (photoURL, displayName, email) => {
+    console.log(displayName);
+    setCurrentUserChat({
+      photoURL,
+      displayName,
+      email,
+    });
+    firestore
+      .collection("user")
+      .doc(id)
+      .update({
+        available: false,
+      });
+  };
 
   return (
     <div
@@ -93,6 +133,9 @@ export default ({history}) => {
       }}>
       <Header>
         <div>Welcome {displayName}!!!</div>
+        <div>
+          <ImageContainer src={photoURL} style={{marginTop: "15px"}} />
+        </div>
         <LogoutButton
           onClick={async () => {
             const response = await new Auth().logout();
@@ -106,13 +149,15 @@ export default ({history}) => {
       <Container>
         <ListUserContainer>
           {userList.map(user => {
-            const {photoURL, displayName, email} = user;
+            const {photoURL, displayName, email, id, available} = user || {};
             return (
               <UserItem
                 photoURL={photoURL}
                 displayName={displayName}
                 email={email}
-                onClick={() => {
+                available={available}
+                key={id}
+                handleClickOnUserItem={() => {
                   handleClickOnUserItem(photoURL, displayName, email);
                 }}
               />
@@ -120,7 +165,19 @@ export default ({history}) => {
           })}
         </ListUserContainer>
         <ConversationContainer>
-          <ConverstationDetail photoURL={photoURL} displayName={displayName} email={email} />
+          {currentUserChat ? (
+            <ConverstationDetail user={currentUserChat} />
+          ) : (
+            <div
+              style={{
+                height: "100%",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}>
+              <h3> You are available to start a new conversation</h3>
+            </div>
+          )}
         </ConversationContainer>
       </Container>
     </div>
