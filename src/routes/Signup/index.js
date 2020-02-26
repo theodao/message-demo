@@ -3,7 +3,9 @@ import styled from "styled-components";
 import {useForm} from "react-hook-form";
 import {toast} from "react-toastify";
 import * as yup from "yup";
-import firebase from "../../config/firebase";
+import APP, {ERROR} from "../../config/const";
+import firebase, {firestore} from "../../config/firebase";
+import Auth from "../../config/auth";
 
 const Input = styled.input`
   background-color: rgba(241, 241, 241, 0.7);
@@ -53,35 +55,43 @@ const schema = yup.object().shape({
   email: yup
     .string()
     .email()
-    .required(),
-  password: yup.string().required(),
+    .required(ERROR.REQUIRED),
+  password: yup.string().required(ERROR.REQUIRED),
+  photoURL: yup.string().required(ERROR.REQUIRED),
+  displayName: yup.string().required(ERROR.REQUIRED),
 });
 
 const Signup = ({history}) => {
-  const {register, handleSubmit, errors} = useForm({
+  const {register, handleSubmit, errors, formState} = useForm({
     validationSchema: schema,
+    mode: "onChange",
   });
 
-  const onSubmit = async ({email, password}) => {
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(email, password)
-      .then(user => {
-        console.log(user);
-      })
-      .catch(err => toast.error(err.message));
+  const onSubmit = async ({email, password, photoURL, displayName}) => {
+    const result = await new Auth().signUpWithEmail({email, password, photoURL, displayName});
+    if (result.success) {
+      toast.success("Sign up successfully");
+      history.push("/login");
+    } else {
+      toast.error(result.message);
+    }
   };
 
   return (
     <Container>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Headline>Welcome to personal blog !</Headline>
+        <Headline>Welcome to message app !</Headline>
         <Input type="text" placeholder="Email" name="email" ref={register({})} />
         <div className="error">{errors.email && errors.email.message}</div>
         <Input type="password" placeholder="Password" name="password" ref={register({})} />
         <div className="error">{errors.password && errors.password.message}</div>
-        <Button disabled={errors.password || errors.username}>Log in</Button>
-        <Button>Sign up</Button>
+        <Input type="text" placeholder="PhotoURL" name="photoURL" ref={register({})} />
+        <div className="error">{errors.photoURL && errors.photoURL.message}</div>
+        <Input type="text" placeholder="Display name" name="displayName" ref={register({})} />
+        <div className="error">{errors.displayName && errors.displayName.message}</div>
+        <Button disabled={Object.keys(errors).length !== 0 || Object.keys(formState.touched).length === 0}>
+          Sign up
+        </Button>
       </form>
     </Container>
   );

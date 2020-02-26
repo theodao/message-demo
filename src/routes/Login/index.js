@@ -1,9 +1,12 @@
-import React from "react";
+import React, {useEffect} from "react";
 import styled from "styled-components";
 import {useForm} from "react-hook-form";
 import {toast} from "react-toastify";
+import fire from "firebase";
 import * as yup from "yup";
-import firebase from "../../config/firebase";
+import firebase, {providers} from "../../config/firebase";
+import Auth from "../../config/auth";
+import {ERROR} from "../../config/const";
 
 const Input = styled.input`
   background-color: rgba(241, 241, 241, 0.7);
@@ -25,7 +28,7 @@ const Button = styled.button`
   vertical-align: middle;
   user-select: none;
   border: 1px solid transparent;
-  padding: .5rem 1rem;
+  padding: .5rem 0;
   color: #fff;
   border-radius: 5px;
   cursor: pointer;
@@ -42,9 +45,15 @@ const Headline = styled.h1``;
 
 const Container = styled.div`
   max-width: 900px;
-  display: flex;
   height: 100vh;
   margin: 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Flex = styled.div`
+  display: flex;
   justify-content: center;
   align-items: center;
 `;
@@ -53,37 +62,57 @@ const schema = yup.object().shape({
   email: yup
     .string()
     .email()
-    .required(),
-  password: yup.string().required(),
+    .required(ERROR.REQUIRED),
+  password: yup.string().required(ERROR.REQUIRED),
 });
 
 const Login = ({history}) => {
-  const {register, handleSubmit, errors} = useForm({
+  const {register, handleSubmit, errors, formState} = useForm({
     validationSchema: schema,
+    mode: "onChange",
   });
 
+  useEffect(() => {
+    if (new Auth().isLogin()) {
+      history.push("/dashboard");
+    }
+  }, []);
+
   const onSubmit = async ({email, password}) => {
-    firebase
-      .auth()
-      .signInWithEmailAndPassword(email, password)
-      .then(user => {
-        console.log(user);
-      })
-      .catch(err => toast.error(err.message));
+    const result = await new Auth().loginViaEmail({email, password});
+    if (result.success) {
+      history.push("/dashboard");
+    } else {
+      toast.error(result.message);
+    }
+  };
+
+  const handleLoginWithGoogle = async () => {
+    const response = await new Auth().logInViaPopup();
+    if (response.success) {
+      history.push("/dashboard");
+    }
+  };
+
+  const handleSignup = () => {
+    history.push("/signup");
   };
 
   return (
     <Container>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Headline>Welcome to personal blog !</Headline>
+        <Headline>Welcome to message app !</Headline>
         <Input type="text" placeholder="Email" name="email" ref={register({})} />
         <div className="error">{errors.email && errors.email.message}</div>
         <Input type="password" placeholder="Password" name="password" ref={register({})} />
         <div className="error">{errors.password && errors.password.message}</div>
-        <Button disabled={errors.password || errors.username}>Log in</Button>
-        {/* <Button>Sign up</Button> */}
-        <Button onClick={() => {}}>Log in with Google</Button>
-        <Button>Log in with Facebook</Button>
+        <Button
+          disabled={Object.keys(errors).length !== 0 || Object.keys(formState.touched).length === 0}
+          onClick={handleSubmit(onSubmit)}>
+          Log in
+        </Button>
+        <Button onClick={handleSignup}>Sign up</Button>
+        <Button onClick={handleLoginWithGoogle}>Log in with Google</Button>
       </form>
     </Container>
   );

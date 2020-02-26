@@ -1,18 +1,31 @@
 @import "./font.scss";
 @import "./spacing.scss";
 
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
   padding: 0;
+  height: 100%;
   font-family: "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
     "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  // font-weight: 600;
-  font-size: 13px;
+  font-weight: 400;
+  font-size: 14px;
   // overflow: hidden;
   box-sizing: border-box;
   color: #000;
+}
+
+#root {
+  height: 100%;
+}
+
+.App {
+  height: 100%;
 }
 
 code {
