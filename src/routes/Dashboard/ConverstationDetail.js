@@ -4,14 +4,14 @@ import styled from "styled-components";
 const Header = styled.div`
   text-align: center;
   border-bottom: 1px solid #e8e8e8;
-  padding: 5px;
+`;
+
+const Flex = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: row;
 `;
-
-const Flex = styled.div``;
 
 const MessageContaier = styled.div`
   heigth: 80%;
@@ -31,9 +31,8 @@ const ImageContainer = styled.img`
 `;
 
 const Container = styled.div`
-  display: flex;
-  flex-direction: column;
   height: 100%;
+  overflow: hidden;
 `;
 
 const Input = styled.textarea`
@@ -42,7 +41,7 @@ const Input = styled.textarea`
   padding: 5px;
 `;
 
-export default ({user}) => {
+export default ({user, setCurrentUserChat}) => {
   const [userInfo, setUserInfo] = useState(user);
   let [value, setValue] = useState(null);
   useEffect(() => {
@@ -51,16 +50,31 @@ export default ({user}) => {
   const handleSendMessage = () => {};
 
   return (
-    <Container>
-      <Header style={{height: "10%"}}>
-        <ImageContainer src={userInfo.photoURL} />
-        <span style={{marginLeft: "5px"}}>{userInfo.displayName}</span>
-      </Header>
-      <MessageContaier style={{height: "80%"}}>message</MessageContaier>
-      <ChatContainer style={{height: "10%"}}>
-        <Input value={value} onChange={e => setValue(e.target.value)} />
-        <button onClick={handleSendMessage}>Send</button>
-      </ChatContainer>
-    </Container>
+    <>
+      <Container>
+        <Header style={{height: "10%", position: "relative"}}>
+          <Flex>
+            <ImageContainer src={userInfo.photoURL} />
+            <span style={{marginLeft: "5px"}}>{userInfo.displayName}</span>
+          </Flex>
+          <div
+            style={{
+              textAlign: "end",
+              cursor: "pointer",
+              position: "absolute",
+              display: "inline-block",
+              bottom: 0,
+              right: 0,
+            }}>
+            Close
+          </div>
+        </Header>
+        <MessageContaier style={{height: "80%"}}>message</MessageContaier>
+        <ChatContainer style={{height: "10%"}}>
+          <Input value={value} onChange={e => setValue(e.target.value)} />
+          <button onClick={handleSendMessage}>Send</button>
+        </ChatContainer>
+      </Container>
+    </>
   );
 };

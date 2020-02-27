@@ -17,7 +17,9 @@ export default class Auth {
       .auth()
       .signInWithPopup(this.googleProvider)
       .then(async response => {
+        let isChatWith = null;
         const {displayName, photoURL, email, uid} = response.user;
+        console.log(response.user);
         const result = await firestore
           .collection("user")
           .where("email", "==", email)
@@ -33,6 +35,10 @@ export default class Auth {
               displayName,
               available: true,
             });
+        } else {
+          let user = result.docs[0].data();
+          isChatWith = user.isChatWith;
+          this.storage.setItem(APP.USER_ISCHATWITH, isChatWith);
         }
         this.storage.setItem(APP.USER_ID, uid);
         this.storage.setItem(APP.USER_DISPLAYNAME, displayName);
@@ -68,11 +74,12 @@ export default class Auth {
           };
         }
         const result = snapshot.data();
-        const {displayName, email, photoURL} = result;
+        const {displayName, email, photoURL, isChatWith} = result;
         this.storage.setItem(APP.USER_ID, uid);
         this.storage.setItem(APP.USER_DISPLAYNAME, displayName);
         this.storage.setItem(APP.USER_EMAIL, email);
         this.storage.setItem(APP.USER_PHOTOURL, photoURL);
+        this.storage.setItem(APP.USER_ISCHATWITH, isChatWith);
         return {
           success: true,
           data: response,
@@ -128,6 +135,7 @@ export default class Auth {
         this.storage.removeItem(APP.USER_DISPLAYNAME);
         this.storage.removeItem(APP.USER_EMAIL);
         this.storage.removeItem(APP.USER_PHOTOURL);
+        this.storage.removeItem(APP.USER_ISCHATWITH);
         return {
           success: true,
         };
@@ -150,6 +158,7 @@ export default class Auth {
       displayName: this.storage.getItem(APP.USER_DISPLAYNAME),
       email: this.storage.getItem(APP.USER_EMAIL),
       photoURL: this.storage.getItem(APP.USER_PHOTOURL),
+      isChatWith: this.storage.getItem(APP.USER_ISCHATWITH),
     };
   };
 }

@@ -52,12 +52,6 @@ const Container = styled.div`
   align-items: center;
 `;
 
-const Flex = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
 const schema = yup.object().shape({
   email: yup
     .string()
@@ -112,7 +106,13 @@ const Login = ({history}) => {
           Log in
         </Button>
         <Button onClick={handleSignup}>Sign up</Button>
-        <Button onClick={handleLoginWithGoogle}>Log in with Google</Button>
+        <Button
+          onClick={e => {
+            e.preventDefault();
+            handleLoginWithGoogle();
+          }}>
+          Log in with Google
+        </Button>
       </form>
     </Container>
   );

@@ -2,6 +2,7 @@ import React, {useEffect, useState} from "react";
 import styled from "styled-components";
 import fire, {firestore} from "../../config/firebase";
 import ConverstationDetail from "./ConverstationDetail";
+import MainContainer from "../../components/MainContainer";
 import APP from "../../config/const";
 import Auth from "../../config/auth";
 
@@ -76,6 +77,10 @@ const Name = styled.div`
   }
 `;
 
+const Email = styled.div`
+  width: 100%;
+`;
+
 const UserItem = ({photoURL, displayName, email, available, handleClickOnUserItem}) => {
   return (
     <UserItemContainer onClick={() => handleClickOnUserItem()}>
@@ -87,18 +92,22 @@ const UserItem = ({photoURL, displayName, email, available, handleClickOnUserIte
           marginLeft: "10px",
         }}>
         <Name available={available}>{displayName}</Name>
-        <div>{email}</div>
+        <Email>{email}</Email>
       </div>
     </UserItemContainer>
   );
 };
 
 export default ({history}) => {
-  const {displayName, id, email, photoURL} = new Auth().getUserInfo();
+  const {displayName, id, email, photoURL, isChatWith} = new Auth().getUserInfo();
   const [userList, setUserList] = useState([]);
   const [currentUserChat, setCurrentUserChat] = useState(null);
+  let [loading, setLoading] = useState(false);
+  // Get list of user
   useEffect(() => {
+    setLoading(true);
     firestore.collection("user").onSnapshot(snapshot => {
+      setLoading(false);
       setUserList(
         snapshot.docs
           .map(doc => {
@@ -111,7 +120,17 @@ export default ({history}) => {
     });
   }, []);
 
-  const handleClickOnUserItem = (photoURL, displayName, email) => {
+  // Get user whom current user is chatting with
+  useEffect(() => {
+    firestore
+      .collection("user")
+      .doc(isChatWith)
+      .get()
+      .then(response => {
+        setCurrentUserChat(response.data());
+      });
+  }, []);
+  const handleClickOnUserItem = (photoURL, displayName, email, uid) => {
     console.log(displayName);
     setCurrentUserChat({
       photoURL,
@@ -123,63 +142,66 @@ export default ({history}) => {
       .doc(id)
       .update({
         available: false,
+        isChatWith: uid,
       });
   };
 
   return (
-    <div
-      style={{
-        height: "100%",
-      }}>
-      <Header>
-        <div>Welcome {displayName}!!!</div>
-        <div>
-          <ImageContainer src={photoURL} style={{marginTop: "15px"}} />
-        </div>
-        <LogoutButton
-          onClick={async () => {
-            const response = await new Auth().logout();
-            if (response.success) {
-              history.push("/login");
-            }
-          }}>
-          Log out
-        </LogoutButton>
-      </Header>
-      <Container>
-        <ListUserContainer>
-          {userList.map(user => {
-            const {photoURL, displayName, email, id, available} = user || {};
-            return (
-              <UserItem
-                photoURL={photoURL}
-                displayName={displayName}
-                email={email}
-                available={available}
-                key={id}
-                handleClickOnUserItem={() => {
-                  handleClickOnUserItem(photoURL, displayName, email);
-                }}
-              />
-            );
-          })}
-        </ListUserContainer>
-        <ConversationContainer>
-          {currentUserChat ? (
-            <ConverstationDetail user={currentUserChat} />
-          ) : (
-            <div
-              style={{
-                height: "100%",
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}>
-              <h3> You are available to start a new conversation</h3>
-            </div>
-          )}
-        </ConversationContainer>
-      </Container>
-    </div>
+    <MainContainer loading={loading}>
+      <div
+        style={{
+          height: "100%",
+        }}>
+        <Header>
+          <div>Welcome {displayName}!!!</div>
+          <div>
+            <ImageContainer src={photoURL} style={{marginTop: "15px"}} />
+          </div>
+          <LogoutButton
+            onClick={async () => {
+              const response = await new Auth().logout();
+              if (response.success) {
+                history.push("/login");
+              }
+            }}>
+            Log out
+          </LogoutButton>
+        </Header>
+        <Container>
+          <ListUserContainer>
+            {userList.map(user => {
+              const {photoURL, displayName, email, id, available} = user || {};
+              return (
+                <UserItem
+                  photoURL={photoURL}
+                  displayName={displayName}
+                  email={email}
+                  available={available}
+                  key={id}
+                  handleClickOnUserItem={() => {
+                    handleClickOnUserItem(photoURL, displayName, email, id);
+                  }}
+                />
+              );
+            })}
+          </ListUserContainer>
+          <ConversationContainer>
+            {currentUserChat ? (
+              <ConverstationDetail user={currentUserChat} setCurrentUserChat={setCurrentUserChat} />
+            ) : (
+              <div
+                style={{
+                  height: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}>
+                <h3> You are available to start a new conversation</h3>
+              </div>
+            )}
+          </ConversationContainer>
+        </Container>
+      </div>
+    </MainContainer>
   );
 };
