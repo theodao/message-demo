@@ -10,24 +10,27 @@ const Header = styled.div`
   font-weight: 700;
   font-size: 20px;
   color: #203152;
-  background-color: #f5a623;
+  background-color: #98d4f3;
   box-shadow: 0 4px 4px #808888;
   text-align: center;
   margin: 0 auto;
   padding: 30px;
+  display: flex;
+  flex-direction: column;
   height: calc(20vh - 60px);
 `;
 
 const LogoutButton = styled.div`
-  color: #203152;
-  border-radius: 5px;
-  border: 1px solid #e8e8e8;
   display: inline-block;
   font-size: 12px;
+  color: #203152;
   padding: 5px;
+  width: 50px;
+  align-self: center;
   cursor: pointer;
+  border-radius: 5px;
+  border: 1px solid #e8e8e8;
   background-color: #96af96;
-  margin-top: 10px;
 `;
 
 const Container = styled.div`
@@ -70,6 +73,7 @@ const Name = styled.div`
     display: inline-block;
     position: absolute;
     top: 9px;
+    word-break: break-all;
     border-radius: 50%;
     margin-left: 5px;
     align-items: center;
@@ -79,6 +83,7 @@ const Name = styled.div`
 
 const Email = styled.div`
   width: 100%;
+  word-break: break-all;
 `;
 
 const UserItem = ({photoURL, displayName, email, available, handleClickOnUserItem}) => {
@@ -90,6 +95,7 @@ const UserItem = ({photoURL, displayName, email, available, handleClickOnUserIte
           display: "flex",
           flexDirection: "column",
           marginLeft: "10px",
+          width: "100%",
         }}>
         <Name available={available}>{displayName}</Name>
         <Email>{email}</Email>
@@ -122,13 +128,15 @@ export default ({history}) => {
 
   // Get user whom current user is chatting with
   useEffect(() => {
-    firestore
-      .collection("user")
-      .doc(isChatWith)
-      .get()
-      .then(response => {
-        setCurrentUserChat(response.data());
-      });
+    if (isChatWith) {
+      firestore
+        .collection("user")
+        .doc(isChatWith)
+        .get()
+        .then(response => {
+          setCurrentUserChat(response.data());
+        });
+    }
   }, []);
   const handleClickOnUserItem = (photoURL, displayName, email, uid) => {
     console.log(displayName);
@@ -143,6 +151,17 @@ export default ({history}) => {
       .update({
         available: false,
         isChatWith: uid,
+      });
+  };
+
+  const onHandleCloseChat = () => {
+    setCurrentUserChat(null);
+    firestore
+      .collection("user")
+      .doc(id)
+      .update({
+        available: true,
+        isChatWith: null,
       });
   };
 
@@ -187,7 +206,11 @@ export default ({history}) => {
           </ListUserContainer>
           <ConversationContainer>
             {currentUserChat ? (
-              <ConverstationDetail user={currentUserChat} setCurrentUserChat={setCurrentUserChat} />
+              <ConverstationDetail
+                user={currentUserChat}
+                setCurrentUserChat={setCurrentUserChat}
+                onCloseChat={onHandleCloseChat}
+              />
             ) : (
               <div
                 style={{

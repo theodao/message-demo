@@ -10,8 +10,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
-    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  font-family: "Helvetica Neue", "Segoe UI", "Helvetica", "Arial", " sans-serif";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
@@ -23,15 +22,16 @@ body {
 
 #root {
   height: 100%;
+  box-sizing: border-box;
 }
 
 .App {
   height: 100%;
+  box-sizing: border-box;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-    monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
 .error {
@@ -48,4 +48,9 @@ code {
 .Toastify__toast--error {
   background: #e74c3c;
   border: 1px solid #b14747;
+}
+
+textarea {
+  font-family: inherit;
+  font-size: inherit;
 }

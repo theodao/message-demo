@@ -11,6 +11,7 @@ const Flex = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: row;
+  padding: 10px;
 `;
 
 const MessageContaier = styled.div`
@@ -18,9 +19,8 @@ const MessageContaier = styled.div`
 `;
 
 const ChatContainer = styled.div`
-  height: 10%;
-  border-top: 1px solid #e8e8e8;
   display: flex;
+  margin-bottom: 5px;
 `;
 
 const ImageContainer = styled.img`
@@ -36,12 +36,41 @@ const Container = styled.div`
 `;
 
 const Input = styled.textarea`
-  width: 80%;
-  border-radius: 10px;
-  padding: 5px;
+  width: 100%;
+  border-radius: 20px;
+  outline: none;
+  font-size: 12px;
+  color: #676767;
+  transition: border 0.5s;
+  border: solid 3px #98d4f3;
+  resize: none;
+  overflow: hidden;
 `;
 
-export default ({user, setCurrentUserChat}) => {
+const Button = styled.div`
+  text-align: end;
+  cursor: pointer;
+  position: absolute;
+  display: inline-block;
+  bottom: 0;
+  right: 0;
+  padding: 5px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #203152;
+  border-radius: 5px;
+  border: 1px solid #e8e8e8;
+  background-color: #ff270b61;
+`;
+
+const ImportFile = styled.img`
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  margin: 0px 5px;
+`;
+
+export default ({user, setCurrentUserChat, onCloseChat}) => {
   const [userInfo, setUserInfo] = useState(user);
   let [value, setValue] = useState(null);
   useEffect(() => {
@@ -57,22 +86,18 @@ export default ({user, setCurrentUserChat}) => {
             <ImageContainer src={userInfo.photoURL} />
             <span style={{marginLeft: "5px"}}>{userInfo.displayName}</span>
           </Flex>
-          <div
-            style={{
-              textAlign: "end",
-              cursor: "pointer",
-              position: "absolute",
-              display: "inline-block",
-              bottom: 0,
-              right: 0,
+          <Button
+            onClick={() => {
+              onCloseChat();
             }}>
-            Close
-          </div>
+            Close chat
+          </Button>
         </Header>
-        <MessageContaier style={{height: "80%"}}>message</MessageContaier>
-        <ChatContainer style={{height: "10%"}}>
+        <MessageContaier style={{height: "85%"}}>message</MessageContaier>
+        <ChatContainer style={{height: "4%"}}>
+          <ImportFile src="/image/uy.svg" />
           <Input value={value} onChange={e => setValue(e.target.value)} />
-          <button onClick={handleSendMessage}>Send</button>
+          <ImportFile src="/image/send-svgrepo-com.svg" />
         </ChatContainer>
       </Container>
     </>
