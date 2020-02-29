@@ -1,5 +1,6 @@
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import styled from "styled-components";
+import Message from "./Message";
 
 const Header = styled.div`
   text-align: center;
@@ -15,7 +16,14 @@ const Flex = styled.div`
 `;
 
 const MessageContaier = styled.div`
-  heigth: 80%;
+  height: 85%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding: 15px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  box-sizing: border-box;
 `;
 
 const ChatContainer = styled.div`
@@ -72,11 +80,26 @@ const ImportFile = styled.img`
 
 export default ({user, setCurrentUserChat, onCloseChat}) => {
   const [userInfo, setUserInfo] = useState(user);
-  let [value, setValue] = useState(null);
+  const [messages, setMessages] = useState([]);
+  let [value, setValue] = useState("");
   useEffect(() => {
     setUserInfo(user);
   }, [user]);
-  const handleSendMessage = () => {};
+
+  useEffect(() => {
+    setMessages([]);
+  }, [user]);
+  const handleSendMessage = e => {
+    setMessages([...messages, e.target.value]);
+    setValue("");
+    e.preventDefault();
+  };
+
+  const handleKeyPress = e => {
+    if (e.keyCode === 13) {
+      handleSendMessage(e);
+    }
+  };
 
   return (
     <>
@@ -93,11 +116,15 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
             Close chat
           </Button>
         </Header>
-        <MessageContaier style={{height: "85%"}}>message</MessageContaier>
+        <MessageContaier>
+          {messages.map(message => (
+            <Message>{message}</Message>
+          ))}
+        </MessageContaier>
         <ChatContainer style={{height: "4%"}}>
           <ImportFile src="/image/uy.svg" />
-          <Input value={value} onChange={e => setValue(e.target.value)} />
-          <ImportFile src="/image/send-svgrepo-com.svg" />
+          <Input value={value} onChange={e => setValue(e.target.value)} onKeyDown={e => handleKeyPress(e)} />
+          <ImportFile src="/image/send-svgrepo-com.svg" onClick={() => {}} />
         </ChatContainer>
       </Container>
     </>
