@@ -139,11 +139,12 @@ export default ({history}) => {
     }
   }, []);
   const handleClickOnUserItem = (photoURL, displayName, email, uid) => {
-    console.log(displayName);
+    console.log(uid);
     setCurrentUserChat({
       photoURL,
       displayName,
       email,
+      uid,
     });
     firestore
       .collection("user")

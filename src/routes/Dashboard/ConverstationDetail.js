@@ -1,6 +1,8 @@
 import React, {useState, useEffect, useRef} from "react";
 import styled from "styled-components";
 import Message from "./Message";
+import {firestore} from "../../config/firebase";
+import Auth from "../../config/auth";
 
 const Header = styled.div`
   text-align: center;
@@ -83,12 +85,19 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
   const [messages, setMessages] = useState([]);
   let [value, setValue] = useState("");
   useEffect(() => {
+    const {id} = new Auth().getUserInfo();
     setUserInfo(user);
+    console.log(id);
+    firestore
+      .collection("messages")
+      .doc(`${id}-${user.uid}`)
+      .onSnapshot(snapshot => {
+        if (snapshot.exists) {
+          console.log(snapshot.docs);
+        }
+      });
   }, [user]);
 
-  useEffect(() => {
-    setMessages([]);
-  }, [user]);
   const handleSendMessage = e => {
     setMessages([...messages, e.target.value]);
     setValue("");
