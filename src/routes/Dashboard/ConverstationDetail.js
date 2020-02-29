@@ -1,6 +1,7 @@
 import React, {useState, useEffect, useRef} from "react";
 import styled from "styled-components";
 import Message from "./Message";
+import fire from "firebase";
 import {firestore} from "../../config/firebase";
 import Auth from "../../config/auth";
 
@@ -81,25 +82,61 @@ const ImportFile = styled.img`
 `;
 
 export default ({user, setCurrentUserChat, onCloseChat}) => {
+  const {id} = new Auth().getUserInfo();
   const [userInfo, setUserInfo] = useState(user);
+  let [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
   let [value, setValue] = useState("");
   useEffect(() => {
-    const {id} = new Auth().getUserInfo();
+    // Subscribe to new message receive from firebase cloud
     setUserInfo(user);
-    console.log(id);
+    setLoading(true);
     firestore
       .collection("messages")
-      .doc(`${id}-${user.uid}`)
-      .onSnapshot(snapshot => {
-        if (snapshot.exists) {
-          console.log(snapshot.docs);
+      .where(fire.firestore.FieldPath.documentId(), "in", [`${id}-${user.id}`, `${user.id}-${id}`])
+      .onSnapshot(res => {
+        setLoading(false);
+        if (!res.empty) {
+          const doc = res.docs[0];
+          if (doc.exists) {
+            const {conversation} = doc.data();
+            setMessages(conversation);
+          }
+        } else {
+          setMessages([]);
         }
       });
   }, [user]);
 
   const handleSendMessage = e => {
-    setMessages([...messages, e.target.value]);
+    let value = e.target.value;
+    firestore
+      .collection("messages")
+      .where(fire.firestore.FieldPath.documentId(), "in", [`${id}-${user.id}`, `${user.id}-${id}`])
+      .get()
+      .then(response => {
+        if (response.empty) {
+          // create new thread
+          firestore
+            .collection("messages")
+            .doc(`${id}-${user.id}`)
+            .set({
+              conversation: [{content: value, publisher: id}],
+            })
+            .then(result => console.log(result));
+        } else {
+          // update thread
+          const doc = response.docs[0];
+          const {conversation} = doc.data();
+          firestore
+            .collection("messages")
+            .doc(doc.id)
+            .set({
+              conversation: [...conversation, {content: value, publisher: id}],
+            });
+        }
+      });
+
     setValue("");
     e.preventDefault();
   };
@@ -115,8 +152,8 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
       <Container>
         <Header style={{height: "10%", position: "relative"}}>
           <Flex>
-            <ImageContainer src={userInfo.photoURL} />
-            <span style={{marginLeft: "5px"}}>{userInfo.displayName}</span>
+            <ImageContainer src={user.photoURL} />
+            <span style={{marginLeft: "5px"}}>{user.displayName}</span>
           </Flex>
           <Button
             onClick={() => {
@@ -126,9 +163,11 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
           </Button>
         </Header>
         <MessageContaier>
-          {messages.map(message => (
-            <Message>{message}</Message>
-          ))}
+          {loading ? (
+            <div>Loading</div>
+          ) : (
+            messages.map(({content, publisher}) => <Message isPublisher={publisher === id}>{content}</Message>)
+          )}
         </MessageContaier>
         <ChatContainer style={{height: "4%"}}>
           <ImportFile src="/image/uy.svg" />

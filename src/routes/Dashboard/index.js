@@ -139,12 +139,11 @@ export default ({history}) => {
     }
   }, []);
   const handleClickOnUserItem = (photoURL, displayName, email, uid) => {
-    console.log(uid);
     setCurrentUserChat({
       photoURL,
       displayName,
       email,
-      uid,
+      id: uid,
     });
     firestore
       .collection("user")
@@ -153,6 +152,7 @@ export default ({history}) => {
         available: false,
         isChatWith: uid,
       });
+    localStorage.setItem(APP.USER_ISCHATWITH, uid);
   };
 
   const onHandleCloseChat = () => {
@@ -197,7 +197,6 @@ export default ({history}) => {
                   displayName={displayName}
                   email={email}
                   available={available}
-                  key={id}
                   handleClickOnUserItem={() => {
                     handleClickOnUserItem(photoURL, displayName, email, id);
                   }}
@@ -211,6 +210,7 @@ export default ({history}) => {
                 user={currentUserChat}
                 setCurrentUserChat={setCurrentUserChat}
                 onCloseChat={onHandleCloseChat}
+                key={currentUserChat}
               />
             ) : (
               <div
