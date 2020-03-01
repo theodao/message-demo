@@ -3,6 +3,7 @@ import styled from "styled-components";
 import Message from "./Message";
 import fire from "firebase";
 import {firestore} from "../../config/firebase";
+import {emojiMap} from "../../config/const";
 import Auth from "../../config/auth";
 
 const Header = styled.div`
@@ -92,6 +93,10 @@ const ImportFile = styled.img`
   cursor: pointer;
   margin: 0px 5px;
 `;
+
+const escapeSpecialChars = regex => {
+  return regex.replace(/([()[{*+.$^\\|?])/g, "\\$1");
+};
 
 export default ({user, setCurrentUserChat, onCloseChat}) => {
   const {id} = new Auth().getUserInfo();
@@ -209,7 +214,17 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
         <ChatContainer style={{height: "4%"}}>
           {/* <ImportFile src="/image/uy.svg" /> */}
           <ImportFile src="/image/sticker.svg" onClick={() => setIsShowSticker(!isShowSticker)} />
-          <Input value={value} onChange={e => setValue(e.target.value)} onKeyDown={e => handleKeyPress(e)} />
+          <Input
+            value={value}
+            onChange={e => {
+              for (let i in emojiMap) {
+                let regex = new RegExp(escapeSpecialChars(i), "gim");
+                e.target.value = e.target.value.replace(regex, emojiMap[i]);
+                setValue(e.target.value);
+              }
+            }}
+            onKeyDown={e => handleKeyPress(e)}
+          />
           <ImportFile
             src="/image/send-svgrepo-com.svg"
             onClick={() => {

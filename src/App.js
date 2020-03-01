@@ -1,11 +1,9 @@
-import React, {useState, useEffect} from "react";
-import fire from "firebase";
+import React from "react";
 import {BrowserRouter, Route, Switch, Redirect} from "react-router-dom";
 import {ToastContainer} from "react-toastify";
 import Login from "./routes/Login";
 import Signup from "./routes/Signup";
 import Dashboard from "./routes/Dashboard";
-import firebase from "./config/firebase";
 import withAuth from "./hoc/withAuth";
 
 function App() {

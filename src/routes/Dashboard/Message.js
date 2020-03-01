@@ -30,11 +30,10 @@ const StickerWrapper = styled.img`
   width: 75px;
   height: 75px;
   object-fit: cover;
-`
+`;
 
 export default ({children, isPublisher = true, isSticker}) => {
   let regex = /(https?:\/\/[^\s]+)/g;
-  console.log(isSticker)
   return (
     <Container isPublisher={isPublisher}>
       {regex.test(children) && !isSticker ? (
@@ -42,7 +41,7 @@ export default ({children, isPublisher = true, isSticker}) => {
           {children}
         </LinkWrapper>
       ) : isSticker ? (
-        <StickerWrapper src={children}/>
+        <StickerWrapper src={children} />
       ) : (
         <MessageWrapper isPublisher={isPublisher}>{children}</MessageWrapper>
       )}
