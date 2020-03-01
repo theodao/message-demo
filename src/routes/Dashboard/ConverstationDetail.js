@@ -207,7 +207,7 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
           ))}
         </StickerContainer>
         <ChatContainer style={{height: "4%"}}>
-          <ImportFile src="/image/uy.svg" />
+          {/* <ImportFile src="/image/uy.svg" /> */}
           <ImportFile src="/image/sticker.svg" onClick={() => setIsShowSticker(!isShowSticker)} />
           <Input value={value} onChange={e => setValue(e.target.value)} onKeyDown={e => handleKeyPress(e)} />
           <ImportFile
