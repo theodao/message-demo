@@ -1,8 +1,5 @@
 import React from "react";
 import {withRouter} from "react-router-dom";
-import firebase from "../../config/firebase";
-import Dashboard from "../../routes/Dashboard";
-import Login from "../../routes/Login";
 import Auth from "../../config/auth";
 
 export default ChildComponent => {

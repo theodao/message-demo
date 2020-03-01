@@ -1,6 +1,4 @@
 import firebase, {providers, firestore} from "./firebase";
-import fire from "firebase";
-import {v4 as uuid} from "uuid";
 import APP from "./const";
 
 export default class Auth {

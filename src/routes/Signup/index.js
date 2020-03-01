@@ -3,8 +3,7 @@ import styled from "styled-components";
 import {useForm} from "react-hook-form";
 import {toast} from "react-toastify";
 import * as yup from "yup";
-import APP, {ERROR} from "../../config/const";
-import firebase, {firestore} from "../../config/firebase";
+import {ERROR} from "../../config/const";
 import Auth from "../../config/auth";
 
 const Input = styled.input`

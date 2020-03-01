@@ -12,6 +12,7 @@ const MessageWrapper = styled.div`
   display: inline-block;
   padding: 8px;
   font-size: 16px;
+  height: auto;
   margin-bottom: 3px;
   color: ${props => (props.isPublisher ? "#ffffff" : "#000000")};
 `;
@@ -21,6 +22,7 @@ const LinkWrapper = styled.a`
   border-radius: 10px;
   display: inline-block;
   padding: 8px;
+  height: auto;
   font-size: 16px;
   margin-bottom: 3px;
   color: ${props => (props.isPublisher ? "#ffffff" : "#000000")};

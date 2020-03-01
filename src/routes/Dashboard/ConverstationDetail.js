@@ -25,7 +25,6 @@ const MessageContaier = styled.div`
   padding: 15px 10px;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
   box-sizing: border-box;
 `;
 
@@ -114,6 +113,7 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
     "https://media2.giphy.com/media/8L0T9qoN744tzLk2hM/source.gif",
   ]);
   let [value, setValue] = useState("");
+  const messageListRef = useRef(null);
   useEffect(() => {
     // Subscribe to new message receive from firebase cloud
     setUserInfo(user);
@@ -134,6 +134,16 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
         }
       });
   }, [user]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    if (messageListRef) {
+      messageListRef.current.scrollIntoView({});
+    }
+  };
 
   const handleSendMessage = ({value, isSticker = null}) => {
     if (value) {
@@ -194,11 +204,14 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
           {loading ? (
             <div>Loading</div>
           ) : (
-            messages.map(({content, publisher, isSticker}) => (
-              <Message isPublisher={publisher === id} isSticker={isSticker}>
-                {content}
-              </Message>
-            ))
+            <>
+              {messages.map(({content, publisher, isSticker}) => (
+                <Message isPublisher={publisher === id} isSticker={isSticker}>
+                  {content}
+                </Message>
+              ))}
+              <div style={{float: "left", clear: "both"}} ref={messageListRef} />
+            </>
           )}
         </MessageContaier>
         <StickerContainer visible={isShowSticker}>

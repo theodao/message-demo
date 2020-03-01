@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import styled from "styled-components";
-import fire, {firestore} from "../../config/firebase";
+import {firestore} from "../../config/firebase";
 import ConverstationDetail from "./ConverstationDetail";
 import MainContainer from "../../components/MainContainer";
 import APP from "../../config/const";
@@ -57,10 +57,10 @@ const ListUserContainer = styled.div`
   border-right: 2px solid #e8e8e8;
   heigth: 100%;
   padding: 5px 0;
+  overflow-y: auto;
 `;
 const ConversationContainer = styled.div`
   width: 85%;
-  heigth: 100%;
 `;
 
 const Name = styled.div`

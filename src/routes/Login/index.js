@@ -2,9 +2,7 @@ import React, {useEffect} from "react";
 import styled from "styled-components";
 import {useForm} from "react-hook-form";
 import {toast} from "react-toastify";
-import fire from "firebase";
 import * as yup from "yup";
-import firebase, {providers} from "../../config/firebase";
 import Auth from "../../config/auth";
 import {ERROR} from "../../config/const";
 
