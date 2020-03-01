@@ -20,8 +20,7 @@ const Flex = styled.div`
 
 const MessageContaier = styled.div`
   height: 85%;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  overflow-y: auto;
   padding: 15px 10px;
   display: flex;
   flex-direction: column;
@@ -34,6 +33,18 @@ const ChatContainer = styled.div`
   margin-bottom: 5px;
 `;
 
+const StickerContainer = styled.div`
+  display: ${props => (props.visible ? "flex" : "none")};
+  flex-direction: row;
+`;
+
+const Sticker = styled.img`
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  cursor: pointer;
+`;
+
 const ImageContainer = styled.img`
   width: 50px;
   height: 50px;
@@ -43,7 +54,8 @@ const ImageContainer = styled.img`
 
 const Container = styled.div`
   height: 100%;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 `;
 
 const Input = styled.textarea`
@@ -86,6 +98,16 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
   const [userInfo, setUserInfo] = useState(user);
   let [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
+  let [isShowSticker, setIsShowSticker] = useState(false);
+  let [stickerUrl, setStickerUrl] = useState([
+    "https://media0.giphy.com/media/5zsmDWE4ZOLxM60359/source.gif",
+    "https://media.giphy.com/media/5z5NIlNjK0NxpsecKh/giphy.gif",
+    "https://media1.giphy.com/media/vxAO4SdoYLmWmwWIof/source.gif",
+    "https://media0.giphy.com/media/5zsmDWE4ZOLxM60359/source.gif",
+    "https://media0.giphy.com/media/Mdoyd8MFnzLXPBNrAY/source.gif",
+    "https://media1.giphy.com/media/fLjOXii35SMz1mbito/source.gif",
+    "https://media2.giphy.com/media/8L0T9qoN744tzLk2hM/source.gif",
+  ]);
   let [value, setValue] = useState("");
   useEffect(() => {
     // Subscribe to new message receive from firebase cloud
@@ -108,42 +130,43 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
       });
   }, [user]);
 
-  const handleSendMessage = e => {
-    let value = e.target.value;
-    firestore
-      .collection("messages")
-      .where(fire.firestore.FieldPath.documentId(), "in", [`${id}-${user.id}`, `${user.id}-${id}`])
-      .get()
-      .then(response => {
-        if (response.empty) {
-          // create new thread
-          firestore
-            .collection("messages")
-            .doc(`${id}-${user.id}`)
-            .set({
-              conversation: [{content: value, publisher: id}],
-            })
-            .then(result => console.log(result));
-        } else {
-          // update thread
-          const doc = response.docs[0];
-          const {conversation} = doc.data();
-          firestore
-            .collection("messages")
-            .doc(doc.id)
-            .set({
-              conversation: [...conversation, {content: value, publisher: id}],
-            });
-        }
-      });
+  const handleSendMessage = ({value, isSticker = null}) => {
+    if (value) {
+      firestore
+        .collection("messages")
+        .where(fire.firestore.FieldPath.documentId(), "in", [`${id}-${user.id}`, `${user.id}-${id}`])
+        .get()
+        .then(response => {
+          if (response.empty) {
+            // create new thread
+            firestore
+              .collection("messages")
+              .doc(`${id}-${user.id}`)
+              .set({
+                conversation: [{content: value, publisher: id, isSticker}],
+              })
+              .then(result => console.log(result));
+          } else {
+            // update thread
+            const doc = response.docs[0];
+            const {conversation} = doc.data();
+            firestore
+              .collection("messages")
+              .doc(doc.id)
+              .set({
+                conversation: [...conversation, {content: value, publisher: id, isSticker}],
+              });
+          }
+        });
+    }
 
     setValue("");
-    e.preventDefault();
   };
 
   const handleKeyPress = e => {
     if (e.keyCode === 13) {
-      handleSendMessage(e);
+      handleSendMessage({value: e.target.value});
+      e.preventDefault();
     }
   };
 
@@ -166,13 +189,33 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
           {loading ? (
             <div>Loading</div>
           ) : (
-            messages.map(({content, publisher}) => <Message isPublisher={publisher === id}>{content}</Message>)
+            messages.map(({content, publisher, isSticker}) => (
+              <Message isPublisher={publisher === id} isSticker={isSticker}>
+                {content}
+              </Message>
+            ))
           )}
         </MessageContaier>
+        <StickerContainer visible={isShowSticker}>
+          {stickerUrl.map(url => (
+            <Sticker
+              src={url}
+              onClick={() => {
+                handleSendMessage({value: url, isSticker: true});
+              }}
+            />
+          ))}
+        </StickerContainer>
         <ChatContainer style={{height: "4%"}}>
           <ImportFile src="/image/uy.svg" />
+          <ImportFile src="/image/sticker.svg" onClick={() => setIsShowSticker(!isShowSticker)} />
           <Input value={value} onChange={e => setValue(e.target.value)} onKeyDown={e => handleKeyPress(e)} />
-          <ImportFile src="/image/send-svgrepo-com.svg" onClick={() => {}} />
+          <ImportFile
+            src="/image/send-svgrepo-com.svg"
+            onClick={() => {
+              handleSendMessage({value});
+            }}
+          />
         </ChatContainer>
       </Container>
     </>

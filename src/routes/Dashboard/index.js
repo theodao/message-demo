@@ -89,7 +89,9 @@ const Email = styled.div`
 const UserItem = ({photoURL, displayName, email, available, handleClickOnUserItem}) => {
   return (
     <UserItemContainer onClick={() => handleClickOnUserItem()}>
-      <ImageContainer src={photoURL} />
+      <div>
+        <ImageContainer src={photoURL} />
+      </div>
       <div
         style={{
           display: "flex",
