@@ -13,7 +13,6 @@
   },
   "hosting": {
     "public": "build",
-    "site": "message-app-d4995",
     "ignore": [
       "firebase.json",
       "**/.*",

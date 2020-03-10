@@ -25,7 +25,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "test:all": "set CI=true && react-scripts test && npm run lint",
-    "deploy": "firebase deploy",
+    "deploy": "yarn run build && firebase deploy --only hosting:message-app-d4995",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint --fix src/**/*.js"
   },
