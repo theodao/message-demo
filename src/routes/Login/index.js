@@ -1,10 +1,12 @@
-import React, {useEffect} from "react";
-import styled from "styled-components";
-import {useForm} from "react-hook-form";
-import {toast} from "react-toastify";
-import * as yup from "yup";
-import Auth from "../../config/auth";
-import {ERROR} from "../../config/const";
+import React, { useEffect } from 'react';
+import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import * as yup from 'yup';
+import Auth from '../../config/auth';
+import AuthActions from '../../redux/Auth/reducer';
+import { ERROR } from '../../config/const';
 
 const Input = styled.input`
   background-color: rgba(241, 241, 241, 0.7);
@@ -58,22 +60,23 @@ const schema = yup.object().shape({
   password: yup.string().required(ERROR.REQUIRED),
 });
 
-const Login = ({history}) => {
-  const {register, handleSubmit, errors, formState} = useForm({
+const Login = ({ history, dispatchLogin }) => {
+  const { register, handleSubmit, errors, formState } = useForm({
     validationSchema: schema,
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   useEffect(() => {
     if (new Auth().isLogin()) {
-      history.push("/dashboard");
+      history.push('/dashboard');
     }
   }, []);
 
-  const onSubmit = async ({email, password}) => {
-    const result = await new Auth().loginViaEmail({email, password});
+  const onSubmit = async ({ email, password }) => {
+    dispatchLogin();
+    const result = await new Auth().loginViaEmail({ email, password });
     if (result.success) {
-      history.push("/dashboard");
+      history.push('/dashboard');
     } else {
       toast.error(result.message);
     }
@@ -82,12 +85,12 @@ const Login = ({history}) => {
   const handleLoginWithGoogle = async () => {
     const response = await new Auth().logInViaPopup();
     if (response.success) {
-      history.push("/dashboard");
+      history.push('/dashboard');
     }
   };
 
   const handleSignup = () => {
-    history.push("/signup");
+    history.push('/signup');
   };
 
   return (
@@ -116,4 +119,10 @@ const Login = ({history}) => {
   );
 };
 
-export default Login;
+const mapStateToProps = state => ({});
+
+const mapDispatchToProps = dispatch => ({
+  dispatchLogin: payload => dispatch(AuthActions.login(payload)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);
