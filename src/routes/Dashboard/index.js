@@ -1,10 +1,12 @@
-import React, {useEffect, useState} from "react";
-import styled from "styled-components";
-import {firestore} from "../../config/firebase";
-import ConverstationDetail from "./ConverstationDetail";
-import MainContainer from "../../components/MainContainer";
-import APP from "../../config/const";
-import Auth from "../../config/auth";
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { connect } from 'react-redux';
+import { firestore } from '../../config/firebase';
+import ConverstationDetail from './ConverstationDetail';
+import MainContainer from '../../components/MainContainer';
+import APP from '../../config/const';
+import AuthActions from '../../redux/Auth/reducer';
+import Auth from '../../config/auth';
 
 const Header = styled.div`
   font-weight: 700;
@@ -66,10 +68,10 @@ const ConversationContainer = styled.div`
 const Name = styled.div`
   position: relative;
   &:after {
-    background-color: ${props => (props.available ? "green" : "#e8e8e8")};
+    background-color: ${props => (props.available ? 'green' : '#e8e8e8')};
     width: 5px;
     height: 5px;
-    content: "";
+    content: '';
     display: inline-block;
     position: absolute;
     top: 9px;
@@ -86,7 +88,7 @@ const Email = styled.div`
   word-break: break-all;
 `;
 
-const UserItem = ({photoURL, displayName, email, available, handleClickOnUserItem}) => {
+const UserItem = ({ photoURL, displayName, email, available, handleClickOnUserItem }) => {
   return (
     <UserItemContainer onClick={() => handleClickOnUserItem()}>
       <div>
@@ -94,10 +96,10 @@ const UserItem = ({photoURL, displayName, email, available, handleClickOnUserIte
       </div>
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
-          marginLeft: "10px",
-          width: "100%",
+          display: 'flex',
+          flexDirection: 'column',
+          marginLeft: '10px',
+          width: '100%',
         }}>
         <Name available={available}>{displayName}</Name>
         <Email>{email}</Email>
@@ -106,15 +108,15 @@ const UserItem = ({photoURL, displayName, email, available, handleClickOnUserIte
   );
 };
 
-export default ({history}) => {
-  const {displayName, id, email, photoURL, isChatWith} = new Auth().getUserInfo();
+const Dashboard = ({ history, auth, dispatchLogout }) => {
+  const { displayName, id, email, photoURL, isChatWith } = new Auth().getUserInfo();
   const [userList, setUserList] = useState([]);
   const [currentUserChat, setCurrentUserChat] = useState(null);
   let [loading, setLoading] = useState(false);
   // Get list of user
   useEffect(() => {
     setLoading(true);
-    firestore.collection("user").onSnapshot(snapshot => {
+    firestore.collection('user').onSnapshot(snapshot => {
       setLoading(false);
       setUserList(
         snapshot.docs
@@ -132,7 +134,7 @@ export default ({history}) => {
   useEffect(() => {
     if (isChatWith) {
       firestore
-        .collection("user")
+        .collection('user')
         .doc(isChatWith)
         .get()
         .then(response => {
@@ -148,7 +150,7 @@ export default ({history}) => {
       id: uid,
     });
     firestore
-      .collection("user")
+      .collection('user')
       .doc(id)
       .update({
         available: false,
@@ -160,7 +162,7 @@ export default ({history}) => {
   const onHandleCloseChat = () => {
     setCurrentUserChat(null);
     firestore
-      .collection("user")
+      .collection('user')
       .doc(id)
       .update({
         available: true,
@@ -172,19 +174,19 @@ export default ({history}) => {
     <MainContainer loading={loading}>
       <div
         style={{
-          height: "100%",
+          height: '100%',
         }}>
         <Header>
           <div>Welcome {displayName}!!!</div>
           <div>
-            <ImageContainer src={photoURL} style={{marginTop: "15px"}} />
+            <ImageContainer src={photoURL} style={{ marginTop: '15px' }} />
           </div>
           <LogoutButton
-            onClick={async () => {
-              const response = await new Auth().logout();
-              if (response.success) {
-                history.push("/login");
-              }
+            onClick={() => {
+              dispatchLogout();
+              // if (response.success) {
+              //   history.push('/login');
+              // }
             }}>
             Log out
           </LogoutButton>
@@ -192,7 +194,7 @@ export default ({history}) => {
         <Container>
           <ListUserContainer>
             {userList.map(user => {
-              const {photoURL, displayName, email, id, available} = user || {};
+              const { photoURL, displayName, email, id, available } = user || {};
               return (
                 <UserItem
                   photoURL={photoURL}
@@ -217,10 +219,10 @@ export default ({history}) => {
             ) : (
               <div
                 style={{
-                  height: "100%",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
+                  height: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
                 }}>
                 <h3> You are available to start a new conversation</h3>
               </div>
@@ -231,3 +233,13 @@ export default ({history}) => {
     </MainContainer>
   );
 };
+
+const mapStateToProps = state => ({
+  auth: state.auth,
+});
+
+const mapDispatchToProps = dispatch => ({
+  dispatchLogout: payload => dispatch(AuthActions.logout(payload)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

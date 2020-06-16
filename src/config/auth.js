@@ -1,5 +1,5 @@
-import firebase, {providers, firestore} from "./firebase";
-import APP from "./const";
+import firebase, { providers, firestore } from './firebase';
+import APP from './const';
 
 export default class Auth {
   constructor() {
@@ -16,15 +16,15 @@ export default class Auth {
       .signInWithPopup(this.googleProvider)
       .then(async response => {
         let isChatWith = null;
-        const {displayName, photoURL, email, uid} = response.user;
+        const { displayName, photoURL, email, uid } = response.user;
         console.log(response.user);
         const result = await firestore
-          .collection("user")
-          .where("email", "==", email)
+          .collection('user')
+          .where('email', '==', email)
           .get();
         if (result.docs.length === 0) {
           const _result = await firestore
-            .collection("user")
+            .collection('user')
             .doc(uid)
             .set({
               id: uid,
@@ -54,25 +54,25 @@ export default class Auth {
       });
   };
 
-  loginViaEmail = ({email, password}) => {
+  loginViaEmail = async (email, password) => {
     return this.firebase
       .auth()
       .signInWithEmailAndPassword(email, password)
       .then(async response => {
-        const {user} = response;
-        const {uid} = user;
+        const { user } = response;
+        const { uid } = user;
         const snapshot = await this.firestore
-          .collection("user")
+          .collection('user')
           .doc(uid)
           .get();
         if (!snapshot.exists) {
           return {
             success: false,
-            message: "Wrong info",
+            message: 'Wrong info',
           };
         }
         const result = snapshot.data();
-        const {displayName, email, photoURL, isChatWith} = result;
+        const { displayName, email, photoURL, isChatWith } = result;
         this.storage.setItem(APP.USER_ID, uid);
         this.storage.setItem(APP.USER_DISPLAYNAME, displayName);
         this.storage.setItem(APP.USER_EMAIL, email);
@@ -91,24 +91,24 @@ export default class Auth {
       });
   };
 
-  signUpWithEmail = async ({email, password, photoURL, displayName}) => {
+  signUpWithEmail = async ({ email, password, photoURL, displayName }) => {
     const result = await firestore
-      .collection("user")
-      .where("email", "==", email)
+      .collection('user')
+      .where('email', '==', email)
       .get();
     if (result.docs.length !== 0) {
       return {
         success: false,
-        message: "Email has been taken",
+        message: 'Email has been taken',
       };
     } else {
       const response = await this.firebase.auth().createUserWithEmailAndPassword(email, password);
       console.log(response);
       if (response) {
-        const {user} = response;
-        const {uid} = user;
+        const { user } = response;
+        const { uid } = user;
         const _result = await firestore
-          .collection("user")
+          .collection('user')
           .doc(uid)
           .set({
             id: uid,

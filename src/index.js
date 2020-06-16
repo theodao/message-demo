@@ -1,17 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { ConnectedRouter } from 'connected-react-router';
 import createStore from './redux/store';
 import App from './App';
 import './styles/index.scss';
 import 'react-toastify/dist/ReactToastify.css';
 import * as serviceWorker from './serviceWorker';
 
-const { store } = createStore();
+const { store, persistor } = createStore();
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <PersistGate persistor={persistor}>
+      <App />
+    </PersistGate>
   </Provider>,
   document.getElementById('root'),
 );

@@ -1,10 +1,10 @@
-import React, {useState, useEffect, useRef} from "react";
-import styled from "styled-components";
-import Message from "./Message";
-import fire from "firebase";
-import {firestore} from "../../config/firebase";
-import {emojiMap} from "../../config/const";
-import Auth from "../../config/auth";
+import React, { useState, useEffect, useRef } from 'react';
+import styled from 'styled-components';
+import Message from './Message';
+import fire from 'firebase';
+import { firestore } from '../../config/firebase';
+import { emojiMap } from '../../config/const';
+import Auth from '../../config/auth';
 
 const Header = styled.div`
   text-align: center;
@@ -34,7 +34,7 @@ const ChatContainer = styled.div`
 `;
 
 const StickerContainer = styled.div`
-  display: ${props => (props.visible ? "flex" : "none")};
+  display: ${props => (props.visible ? 'flex' : 'none')};
   flex-direction: row;
 `;
 
@@ -94,39 +94,39 @@ const ImportFile = styled.img`
 `;
 
 const escapeSpecialChars = regex => {
-  return regex.replace(/([()[{*+.$^\\|?])/g, "\\$1");
+  return regex.replace(/([()[{*+.$^\\|?])/g, '\\$1');
 };
 
-export default ({user, setCurrentUserChat, onCloseChat}) => {
-  const {id} = new Auth().getUserInfo();
+export default ({ user, setCurrentUserChat, onCloseChat }) => {
+  const { id } = new Auth().getUserInfo();
   const [userInfo, setUserInfo] = useState(user);
   let [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState([]);
   let [isShowSticker, setIsShowSticker] = useState(false);
   let [stickerUrl, setStickerUrl] = useState([
-    "https://media0.giphy.com/media/5zsmDWE4ZOLxM60359/source.gif",
-    "https://media.giphy.com/media/5z5NIlNjK0NxpsecKh/giphy.gif",
-    "https://media1.giphy.com/media/vxAO4SdoYLmWmwWIof/source.gif",
-    "https://media0.giphy.com/media/5zsmDWE4ZOLxM60359/source.gif",
-    "https://media0.giphy.com/media/Mdoyd8MFnzLXPBNrAY/source.gif",
-    "https://media1.giphy.com/media/fLjOXii35SMz1mbito/source.gif",
-    "https://media2.giphy.com/media/8L0T9qoN744tzLk2hM/source.gif",
+    'https://media0.giphy.com/media/5zsmDWE4ZOLxM60359/source.gif',
+    'https://media.giphy.com/media/5z5NIlNjK0NxpsecKh/giphy.gif',
+    'https://media1.giphy.com/media/vxAO4SdoYLmWmwWIof/source.gif',
+    'https://media0.giphy.com/media/5zsmDWE4ZOLxM60359/source.gif',
+    'https://media0.giphy.com/media/Mdoyd8MFnzLXPBNrAY/source.gif',
+    'https://media1.giphy.com/media/fLjOXii35SMz1mbito/source.gif',
+    'https://media2.giphy.com/media/8L0T9qoN744tzLk2hM/source.gif',
   ]);
-  let [value, setValue] = useState("");
+  let [value, setValue] = useState('');
   const messageListRef = useRef(null);
   useEffect(() => {
     // Subscribe to new message receive from firebase cloud
     setUserInfo(user);
     setLoading(true);
     firestore
-      .collection("messages")
-      .where(fire.firestore.FieldPath.documentId(), "in", [`${id}-${user.id}`, `${user.id}-${id}`])
+      .collection('messages')
+      .where(fire.firestore.FieldPath.documentId(), 'in', [`${id}-${user.id}`, `${user.id}-${id}`])
       .onSnapshot(res => {
         setLoading(false);
         if (!res.empty) {
           const doc = res.docs[0];
           if (doc.exists) {
-            const {conversation} = doc.data();
+            const { conversation } = doc.data();
             setMessages(conversation);
           }
         } else {
@@ -145,42 +145,42 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
     }
   };
 
-  const handleSendMessage = ({value, isSticker = null}) => {
+  const handleSendMessage = ({ value, isSticker = null }) => {
     if (value) {
       firestore
-        .collection("messages")
-        .where(fire.firestore.FieldPath.documentId(), "in", [`${id}-${user.id}`, `${user.id}-${id}`])
+        .collection('messages')
+        .where(fire.firestore.FieldPath.documentId(), 'in', [`${id}-${user.id}`, `${user.id}-${id}`])
         .get()
         .then(response => {
           if (response.empty) {
             // create new thread
             firestore
-              .collection("messages")
+              .collection('messages')
               .doc(`${id}-${user.id}`)
               .set({
-                conversation: [{content: value, publisher: id, isSticker}],
+                conversation: [{ content: value, publisher: id, isSticker }],
               })
               .then(result => console.log(result));
           } else {
             // update thread
             const doc = response.docs[0];
-            const {conversation} = doc.data();
+            const { conversation } = doc.data();
             firestore
-              .collection("messages")
+              .collection('messages')
               .doc(doc.id)
               .set({
-                conversation: [...conversation, {content: value, publisher: id, isSticker}],
+                conversation: [...conversation, { content: value, publisher: id, isSticker }],
               });
           }
         });
     }
 
-    setValue("");
+    setValue('');
   };
 
   const handleKeyPress = e => {
     if (e.keyCode === 13) {
-      handleSendMessage({value: e.target.value});
+      handleSendMessage({ value: e.target.value });
       e.preventDefault();
     }
   };
@@ -188,10 +188,10 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
   return (
     <>
       <Container>
-        <Header style={{height: "10%", position: "relative"}}>
+        <Header style={{ height: '10%', position: 'relative' }}>
           <Flex>
             <ImageContainer src={user.photoURL} />
-            <span style={{marginLeft: "5px"}}>{user.displayName}</span>
+            <span style={{ marginLeft: '5px' }}>{user.displayName}</span>
           </Flex>
           <Button
             onClick={() => {
@@ -205,12 +205,12 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
             <div>Loading</div>
           ) : (
             <>
-              {messages.map(({content, publisher, isSticker}) => (
+              {messages.map(({ content, publisher, isSticker }) => (
                 <Message isPublisher={publisher === id} isSticker={isSticker}>
                   {content}
                 </Message>
               ))}
-              <div style={{float: "left", clear: "both"}} ref={messageListRef} />
+              <div style={{ float: 'left', clear: 'both' }} ref={messageListRef} />
             </>
           )}
         </MessageContaier>
@@ -219,19 +219,19 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
             <Sticker
               src={url}
               onClick={() => {
-                handleSendMessage({value: url, isSticker: true});
+                handleSendMessage({ value: url, isSticker: true });
               }}
             />
           ))}
         </StickerContainer>
-        <ChatContainer style={{height: "4%"}}>
+        <ChatContainer style={{ height: '4%' }}>
           {/* <ImportFile src="/image/uy.svg" /> */}
           <ImportFile src="/image/sticker.svg" onClick={() => setIsShowSticker(!isShowSticker)} />
           <Input
             value={value}
             onChange={e => {
               for (let i in emojiMap) {
-                let regex = new RegExp(escapeSpecialChars(i), "gim");
+                let regex = new RegExp(escapeSpecialChars(i), 'gim');
                 e.target.value = e.target.value.replace(regex, emojiMap[i]);
                 setValue(e.target.value);
               }
@@ -241,7 +241,7 @@ export default ({user, setCurrentUserChat, onCloseChat}) => {
           <ImportFile
             src="/image/send-svgrepo-com.svg"
             onClick={() => {
-              handleSendMessage({value});
+              handleSendMessage({ value });
             }}
           />
         </ChatContainer>

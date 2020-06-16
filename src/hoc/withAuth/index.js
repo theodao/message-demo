@@ -1,13 +1,14 @@
-import React from "react";
-import {withRouter} from "react-router-dom";
-import Auth from "../../config/auth";
+import React from 'react';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 
 export default ChildComponent => {
   class AuthComponent extends React.Component {
     componentDidMount() {
-      if (!new Auth().isLogin()) {
-        console.log("not login");
-        this.props.history.push("/login");
+      const { auth } = this.props;
+
+      if (!auth.isLoggedIn) {
+        this.props.history.push('/login');
       }
     }
 
@@ -15,5 +16,10 @@ export default ChildComponent => {
       return <ChildComponent {...this.props} />;
     }
   }
-  return withRouter(AuthComponent);
+
+  const mapStateToProps = state => ({
+    auth: state.auth,
+  });
+
+  return withRouter(connect(mapStateToProps)(AuthComponent));
 };

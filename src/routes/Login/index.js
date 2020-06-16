@@ -4,7 +4,6 @@ import { connect } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import * as yup from 'yup';
-import Auth from '../../config/auth';
 import AuthActions from '../../redux/Auth/reducer';
 import { ERROR } from '../../config/const';
 
@@ -60,33 +59,24 @@ const schema = yup.object().shape({
   password: yup.string().required(ERROR.REQUIRED),
 });
 
-const Login = ({ history, dispatchLogin }) => {
+const Login = ({ history, dispatchLogin, auth, dispatchLoginViaPopup }) => {
   const { register, handleSubmit, errors, formState } = useForm({
     validationSchema: schema,
     mode: 'onChange',
   });
 
   useEffect(() => {
-    if (new Auth().isLogin()) {
+    if (auth.isLoggedIn) {
       history.push('/dashboard');
     }
   }, []);
 
   const onSubmit = async ({ email, password }) => {
-    dispatchLogin();
-    const result = await new Auth().loginViaEmail({ email, password });
-    if (result.success) {
-      history.push('/dashboard');
-    } else {
-      toast.error(result.message);
-    }
+    dispatchLogin({ email, password });
   };
 
   const handleLoginWithGoogle = async () => {
-    const response = await new Auth().logInViaPopup();
-    if (response.success) {
-      history.push('/dashboard');
-    }
+    dispatchLoginViaPopup();
   };
 
   const handleSignup = () => {
@@ -119,10 +109,13 @@ const Login = ({ history, dispatchLogin }) => {
   );
 };
 
-const mapStateToProps = state => ({});
+const mapStateToProps = state => ({
+  auth: state.auth,
+});
 
 const mapDispatchToProps = dispatch => ({
   dispatchLogin: payload => dispatch(AuthActions.login(payload)),
+  dispatchLoginViaPopup: () => dispatch(AuthActions.loginViaPopup()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
