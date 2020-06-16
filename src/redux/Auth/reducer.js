@@ -6,7 +6,7 @@ const { Types, Creators } = createActions({
   setUserToken: ['payload'],
   setError: ['payload'],
   login: ['payload'],
-  loginViaPopup: [],
+  loginViaPopup: ['payload'],
   logout: ['payload'],
 });
 

@@ -1,10 +1,10 @@
-import React from "react";
-import {BrowserRouter, Route, Switch, Redirect} from "react-router-dom";
-import {ToastContainer} from "react-toastify";
-import Login from "./routes/Login";
-import Signup from "./routes/Signup";
-import Dashboard from "./routes/Dashboard";
-import withAuth from "./hoc/withAuth";
+import React from 'react';
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import Login from './routes/Login';
+import Signup from './routes/Signup';
+import Dashboard from './routes/Dashboard';
+import withAuth from './hoc/withAuth';
 
 function App() {
   return (

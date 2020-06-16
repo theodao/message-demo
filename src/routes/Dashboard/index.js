@@ -183,7 +183,7 @@ const Dashboard = ({ history, auth, dispatchLogout }) => {
           </div>
           <LogoutButton
             onClick={() => {
-              dispatchLogout();
+              dispatchLogout({ history });
               // if (response.success) {
               //   history.push('/login');
               // }

@@ -17,6 +17,7 @@ export default () => {
     key: 'root',
     storage,
     stateReconciler: seamlessImmutableReconciler,
+    blacklist: ['app'],
   };
   const persistedReducer = persistReducer(persistConfig, rootReducer);
   const middleware = [];

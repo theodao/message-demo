@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-toastify';
 import * as yup from 'yup';
 import AuthActions from '../../redux/Auth/reducer';
 import { ERROR } from '../../config/const';
@@ -59,7 +58,7 @@ const schema = yup.object().shape({
   password: yup.string().required(ERROR.REQUIRED),
 });
 
-const Login = ({ history, dispatchLogin, auth, dispatchLoginViaPopup }) => {
+const Login = ({ history, dispatchLogin, auth, dispatchLoginViaPopup, app }) => {
   const { register, handleSubmit, errors, formState } = useForm({
     validationSchema: schema,
     mode: 'onChange',
@@ -72,16 +71,18 @@ const Login = ({ history, dispatchLogin, auth, dispatchLoginViaPopup }) => {
   }, []);
 
   const onSubmit = async ({ email, password }) => {
-    dispatchLogin({ email, password });
+    dispatchLogin({ email, password, history });
   };
 
-  const handleLoginWithGoogle = async () => {
-    dispatchLoginViaPopup();
+  const handleLoginWithGoogle = () => {
+    dispatchLoginViaPopup({ history });
   };
 
   const handleSignup = () => {
     history.push('/signup');
   };
+
+  const { isLoading } = app;
 
   return (
     <Container>
@@ -92,9 +93,9 @@ const Login = ({ history, dispatchLogin, auth, dispatchLoginViaPopup }) => {
         <Input type="password" placeholder="Password" name="password" ref={register({})} />
         <div className="error">{errors.password && errors.password.message}</div>
         <Button
-          disabled={Object.keys(errors).length !== 0 || Object.keys(formState.touched).length === 0}
+          disabled={Object.keys(errors).length !== 0 || Object.keys(formState.touched).length === 0 || isLoading}
           onClick={handleSubmit(onSubmit)}>
-          Log in
+          {isLoading ? <span>Loading...</span> : <span>Log in</span>}
         </Button>
         <Button onClick={handleSignup}>Sign up</Button>
         <Button
@@ -111,11 +112,12 @@ const Login = ({ history, dispatchLogin, auth, dispatchLoginViaPopup }) => {
 
 const mapStateToProps = state => ({
   auth: state.auth,
+  app: state.app,
 });
 
 const mapDispatchToProps = dispatch => ({
   dispatchLogin: payload => dispatch(AuthActions.login(payload)),
-  dispatchLoginViaPopup: () => dispatch(AuthActions.loginViaPopup()),
+  dispatchLoginViaPopup: payload => dispatch(AuthActions.loginViaPopup(payload)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
