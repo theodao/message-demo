@@ -21,12 +21,16 @@ export default () => {
   };
   const persistedReducer = persistReducer(persistConfig, rootReducer);
   const middleware = [];
-  const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
+  const composeEnhancers =
+    (process.env.NODE_ENV === 'production' &&
+      typeof window !== 'undefined' &&
+      window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) ||
+    compose;
 
   /* ------------- Redux Middleware ------------- */
 
   const sagaMiddleware = createSagaMiddleware();
-  middleware.push(createLogger());
+  // middleware.push(createLogger());
   middleware.push(sagaMiddleware);
 
   /* ------------- Create store  ------------- */
